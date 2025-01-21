@@ -1,0 +1,29 @@
+# python cache
+__pycache__/
+
+# python env
+venv/
+
+# python build
+build/
+
+# data files
+data/
+*.csv
+*.faiss
+*.pkl
+*.pickle
+
+!src/data/
+
+
+# logs
+*.log
+
+# env files
+.env
+
+evaluation.py
+
+# nemo guardrails
+/src/core/guardrail
