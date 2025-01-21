@@ -44,6 +44,7 @@ class Settings(BaseSettings):
 
     FAISS_INDEX_PATH: str = str(INDEX_DIR / "faiss_index.faiss")
     BM25_INDEX_PATH: str = str(INDEX_DIR / "bm25_index.pkl")
+    CROSS_ENCODER_RERANKER_PATH: str = str(INDEX_DIR / "cross_encoder_reranker.pkl")
 
     # Guadrail settings
     GUARDRAIL_SETTINGS_DIR: str = str(BASE_DIR / "src" / "core" / "guardrail")
