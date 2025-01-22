@@ -45,6 +45,7 @@ class Settings(BaseSettings):
     FAISS_INDEX_PATH: str = str(INDEX_DIR / "faiss_index.faiss")
     BM25_INDEX_PATH: str = str(INDEX_DIR / "bm25_index.pkl")
     CROSS_ENCODER_RERANKER_PATH: str = str(INDEX_DIR / "cross_encoder_reranker.pkl")
+    CHROMA_INDEX_PATH: str = str(INDEX_DIR / "chroma_index")
 
     # Guadrail settings
     GUARDRAIL_SETTINGS_DIR: str = str(BASE_DIR / "src" / "core" / "guardrail")
@@ -52,7 +53,7 @@ class Settings(BaseSettings):
     FAISS_TOP_K: int = 3
     BM25_TOP_K: int = 3
 
-    RETTRIEVER_TOP_K: int = 5
+    RETRIEVER_TOP_K: int = 5
     RETRIEVER_WEIGHTS: list[float] = [0.5, 0.5]
 
     COMPRESSOR_TOP_K: int = 2
