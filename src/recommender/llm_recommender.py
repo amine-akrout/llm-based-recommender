@@ -22,6 +22,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 
 from src.config import settings
 
+from .utils import CustomChromaTranslator, get_metadata_info
+
 
 def initialize_embeddings_model() -> HuggingFaceEmbeddings:
     """Initializes the HuggingFace embeddings model."""
@@ -56,58 +58,46 @@ def load_chroma_index(embeddings: HuggingFaceEmbeddings) -> Chroma:
         raise e
 
 
-llm_model = ChatOpenAI(
-    model=settings.LLM_MODEL_NAME, temperature=settings.LLM_TEMPERATURE
-)
+def self_query_retriever(vector_store: Chroma) -> SelfQueryRetriever:
+    """
+    Recommends products based on the given query.
+    """
+
+    llm_model = ChatOpenAI(
+        model=settings.LLM_MODEL_NAME, temperature=settings.LLM_TEMPERATURE
+    )
+
+    attribute_info, doc_contents = get_metadata_info()
+
+    chain = load_query_constructor_runnable(
+        llm=llm_model, document_contents=doc_contents, attribute_info=attribute_info
+    )
+
+    retriever = SelfQueryRetriever(
+        query_constructor=chain,
+        vectorstore=vector_store,
+        verbose=True,
+        structured_query_translator=CustomChromaTranslator(),
+    )
+    return retriever
 
 
-embeddings = initialize_embeddings_model()
-vector_store = load_chroma_index(embeddings)
+def self_query_recommender(retriever: SelfQueryRetriever, query: str):
+    response = retriever.invoke(query)
+    return response
 
 
-attribute_info = [
-    {
-        "name": "Product Details",
-        "description": "Details about the product",
-    },
-    {
-        "name": "Brand Name",
-        "description": "Name of the brand",
-    },
-    {
-        "name": "Available Sizes",
-        "description": "Sizes available for the product",
-    },
-    {
-        "name": "Product Price",
-        "description": "Price of the product",
-    },
-]
+if __name__ == "__main__":
+    embeddings = initialize_embeddings_model()
+    vectorstore = load_chroma_index(embeddings)
+    retriever = self_query_retriever(vectorstore)
 
-doc_contents = "A detailed description of an e-commerce product, including its features, benefits, and specifications."
+    query1 = "woman dress for summer less than 2000"
+    query2 = "woman dress for summer less than 2000 and size xl"
+    set_debug(True)
+    response = retriever.invoke(query1)
+    response2 = retriever.invoke(query2)
 
-
-chain = load_query_constructor_runnable(
-    llm=llm_model, document_contents=doc_contents, attribute_info=attribute_info
-)
-
-retriever = SelfQueryRetriever(
-    query_constructor=chain, vectorstore=vector_store, verbose=True
-)
-
-retriever = SelfQueryRetriever.from_llm(
-    llm=llm_model,
-    vectorstore=vector_store,
-    verbose=True,
-    document_contents=doc_contents,
-    metadata_field_info=attribute_info,
-)
-
-query = "woman dress for summer with size XL"
-set_debug(True)
-response = retriever.invoke(query)
-
-
-for res in response:
-    print(res.page_content)
-    print("\n" + "-" * 20 + "\n")
+    for res in response:
+        print(res.page_content)
+        print("\n" + "-" * 20 + "\n")

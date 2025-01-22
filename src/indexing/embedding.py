@@ -83,20 +83,32 @@ def generate_documents(use_csv_loader: bool = False) -> list:
 
     def convert_price(value):
         try:
-            return float(str(value).replace(",", "").strip())  # Ensure float conversion
+            return float(str(value).replace(",", "").strip())
         except ValueError:
             return 0.0
 
+    def convert_sizes(value):
+        """Convert sizes from string to a comma-separated string."""
+        if pd.isna(value) or not isinstance(value, str):
+            return ""
+        return ", ".join(
+            size.strip().lower() for size in value.replace("Size:", "").split(",")
+        )
+
     df = pd.read_csv(settings.PROCESSED_DATA_PATH)
+    # Convert "Available Sizes"
+    if "Available Sizes" in df.columns:
+        df["Available Sizes"] = df["Available Sizes"].apply(convert_sizes)
+
+    # Convert "Product Price" to float
+    if "Product Price" in df.columns:
+        df["Product Price"] = df["Product Price"].apply(convert_price)
+
     documents = [
         Document(
             page_content=json.dumps(row.to_dict(), indent=2),
-            metadata={
-                "Product Details": row["Product Details"],
-                "Brand Name": row["Brand Name"],
-                "Available Sizes": row["Available Sizes"],
-                "Product Price": convert_price(row["Product Price"]),
-            },
+            metadata=row.to_dict(),
+            id=row.name,
         )
         for _, row in df.iterrows()
     ]
