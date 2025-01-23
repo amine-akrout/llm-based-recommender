@@ -3,16 +3,19 @@ This module processes the e-commerce dataset, generates embeddings,
 and indexes them using FAISS (vector search) and BM25 (lexical search).
 """
 
+import json
 import os
 import pickle
 import sys
 from typing import Optional
 
 import pandas as pd
+from langchain_chroma import Chroma
 from langchain_community.document_loaders import CSVLoader
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.retrievers import BM25Retriever
 from langchain_community.vectorstores import FAISS
+from langchain_core.documents import Document
 from loguru import logger
 
 # Append project root directory
@@ -27,12 +30,12 @@ def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:
         "BrandName": "Brand Name",
         "Sizes": "Available Sizes",
         "SellPrice": "Product Price",
-        "Deatils": "Product Details",  # Assuming this is a typo of "Details"
+        "Deatils": "Product Details",
     }
     return df.rename(columns={k: v for k, v in rename_dict.items() if k in df.columns})
 
 
-def load_and_preprocess_data(n_samples: Optional[int] = 100) -> pd.DataFrame:
+def load_and_preprocess_data(n_samples: Optional[int] = 2000) -> pd.DataFrame:
     """Loads the dataset, preprocesses it, and saves the processed version."""
     if not os.path.exists(settings.RAW_DATA_PATH):
         logger.error(
@@ -54,7 +57,7 @@ def load_and_preprocess_data(n_samples: Optional[int] = 100) -> pd.DataFrame:
     ]
     df = df[[col for col in valid_columns if col in df.columns]]
 
-    df.dropna(subset=["Product Details"], inplace=True)
+    df.dropna(inplace=True)
 
     if n_samples and n_samples < len(df):
         df = df.sample(n_samples, random_state=42)
@@ -66,16 +69,51 @@ def load_and_preprocess_data(n_samples: Optional[int] = 100) -> pd.DataFrame:
     return df
 
 
-def generate_documents() -> list:
+def generate_documents(use_csv_loader: bool = False) -> list:
     """Converts CSV data into LangChain Document objects."""
-    try:
-        loader = CSVLoader(settings.PROCESSED_DATA_PATH, encoding="utf-8")
-        documents = loader.load()
-        logger.info(f"Generated {len(documents)} documents.")
-        return documents
-    except Exception as e:
-        logger.exception("Failed to generate documents.")
-        raise e
+    if use_csv_loader:
+        try:
+            loader = CSVLoader(settings.PROCESSED_DATA_PATH, encoding="utf-8")
+            documents = loader.load()
+            logger.info(f"Generated {len(documents)} documents.")
+            return documents
+        except Exception as e:
+            logger.exception("Failed to generate documents.")
+            raise e
+
+    def convert_price(value):
+        try:
+            return float(str(value).replace(",", "").strip())
+        except ValueError:
+            return 0.0
+
+    def convert_sizes(value):
+        """Convert sizes from string to a comma-separated string."""
+        if pd.isna(value) or not isinstance(value, str):
+            return ""
+        return ", ".join(
+            size.strip().lower() for size in value.replace("Size:", "").split(",")
+        )
+
+    df = pd.read_csv(settings.PROCESSED_DATA_PATH)
+    # Convert "Available Sizes"
+    if "Available Sizes" in df.columns:
+        df["Available Sizes"] = df["Available Sizes"].apply(convert_sizes)
+
+    # Convert "Product Price" to float
+    if "Product Price" in df.columns:
+        df["Product Price"] = df["Product Price"].apply(convert_price)
+
+    documents = [
+        Document(
+            page_content=json.dumps(row.to_dict(), indent=2),
+            metadata=row.to_dict(),
+            id=row.name,
+        )
+        for _, row in df.iterrows()
+    ]
+    logger.info(f"Generated {len(documents)} documents.")
+    return documents
 
 
 def initialize_embeddings_model() -> HuggingFaceEmbeddings:
@@ -102,6 +140,23 @@ def create_faiss_index(embeddings: HuggingFaceEmbeddings, documents: list) -> No
         raise e
 
 
+def create_chroma_index(embeddings: HuggingFaceEmbeddings, documents: list) -> None:
+    """Creates and saves a Chroma index."""
+    try:
+        logger.info("Creating Chroma index...")
+        vector_store = Chroma(
+            collection_name="product_collection",
+            embedding_function=embeddings,
+            persist_directory=settings.CHROMA_INDEX_PATH,
+        )
+        vector_store.add_documents(documents)
+        logger.info(f"Chroma index saved at {settings.CHROMA_INDEX_PATH}")
+        logger.info(f"Number of documents in Chroma index: {len(documents)}")
+    except Exception as e:
+        logger.exception("Failed to create Chroma index.")
+        raise e
+
+
 def create_bm25_index(documents: list) -> None:
     """Creates and saves a BM25 index."""
     try:
@@ -119,7 +174,7 @@ def create_bm25_index(documents: list) -> None:
         raise e
 
 
-def embedding_pipeline(n_samples: Optional[int] = 100) -> None:
+def embedding_pipeline(n_samples: Optional[int] = 2000) -> None:
     """Runs the entire embedding pipeline."""
     try:
         df = load_and_preprocess_data(n_samples)
@@ -128,6 +183,7 @@ def embedding_pipeline(n_samples: Optional[int] = 100) -> None:
 
         create_faiss_index(embeddings, documents)
         create_bm25_index(documents)
+        create_chroma_index(embeddings, documents)
 
         logger.info("Embedding pipeline completed successfully.")
     except Exception as e:

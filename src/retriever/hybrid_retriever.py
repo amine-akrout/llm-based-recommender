@@ -36,7 +36,7 @@ def load_faiss_index() -> FAISS:
         vector_store = FAISS.load_local(
             settings.FAISS_INDEX_PATH,
             embeddings_model,
-            allow_dangerous_deserialization=False,  # Security Improvement
+            allow_dangerous_deserialization=True,
         )
     except Exception as e:
         logger.exception("Failed to load FAISS index.")
@@ -137,7 +137,7 @@ def retriever_flow() -> None:
         bm25_retriever = load_bm25_index()
 
         retrievers = [faiss_retriever]
-        if bm25_retriever:  # Only add BM25 if it was successfully loaded
+        if bm25_retriever:
             retrievers.append(bm25_retriever)
 
         ensemble_retriever = create_ensemble_retriever(retrievers)
