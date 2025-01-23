@@ -2,7 +2,9 @@
 This module contains utility functions for the recommender service.
 """
 
-from langchain_community.query_constructors.chroma import BaseChromaTranslator
+from langchain_community.query_constructors.chroma import (
+    ChromaTranslator as BaseChromaTranslator,
+)
 from langchain_core.structured_query import Comparator, Comparison
 
 
