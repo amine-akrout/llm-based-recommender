@@ -2,6 +2,7 @@
 This module contains utility functions for the recommender service.
 """
 
+from langchain.prompts import PromptTemplate
 from langchain_community.query_constructors.chroma import (
     ChromaTranslator as BaseChromaTranslator,
 )
@@ -60,3 +61,29 @@ DOC_CONTENT = "A detailed description of an e-commerce product, including its fe
 
 def get_metadata_info():
     return ATTRIBUTE_INFO, DOC_CONTENT
+
+
+def create_rag_template():
+    prompt_template = """You are an advanced product recommender system.
+
+    ### **Task:**
+    - Find the best products for the given user query.
+    - Prioritize items **matching query filters** (e.g., price, size).
+    - Rank products by **relevance** and **popularity**.
+
+    ### **Products:**
+    {docs}
+
+    ### **User Query:**
+    {query}
+
+    ### **Recommendation Criteria:**
+    - Exact match with filters (e.g., price < 2000, size = XL).
+    - High user ratings and popularity.
+    - Match with query intent.
+
+    **Return only the most relevant products.**
+    """
+
+    prompt = PromptTemplate(template=prompt_template, input_variables=["docs", "query"])
+    return prompt

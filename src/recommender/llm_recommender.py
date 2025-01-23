@@ -24,9 +24,12 @@ from loguru import logger
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from utils import CustomChromaTranslator, get_metadata_info
-
 from src.config import settings
+from src.recommender.utils import (
+    CustomChromaTranslator,
+    create_rag_template,
+    get_metadata_info,
+)
 
 
 def initialize_embeddings_model() -> HuggingFaceEmbeddings:
@@ -113,17 +116,7 @@ def build_rag_chain():
     RAG retriever.
     """
     set_llm_cache(InMemoryCache())
-    # define the prompt template
-    prompt_template = """You are a product recommender system that helps users find products.
-    You are given a list of products and a query. You need to find the most relevant products based on the query.
-
-    Products:
-    {docs}
-
-    Query: {query}
-    """
-
-    prompt = PromptTemplate(template=prompt_template, input_variables=["docs", "query"])
+    prompt = create_rag_template()
 
     llm = ChatOpenAI(
         model=settings.LLM_MODEL_NAME,
