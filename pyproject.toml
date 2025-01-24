@@ -7,6 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "faiss-cpu==1.7.4",
     "fastapi==0.115.7",
+    "ipykernel>=6.29.5",
     "kaggle==1.6.17",
     "langchain==0.3.15",
     "langchain-chroma==0.2.0",
@@ -20,6 +21,8 @@ dependencies = [
     "pandas==2.0.2",
     "pydantic==2.10.6",
     "pydantic-settings==2.7.1",
+    "pytest>=8.3.4",
+    "pytest-mock>=3.14.0",
     "python-dotenv==1.0.1",
     "rank-bm25==0.2.2",
     "transformers==4.46.3",

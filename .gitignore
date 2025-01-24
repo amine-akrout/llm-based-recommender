@@ -29,3 +29,4 @@ evaluation.py
 /src/core/guardrail
 /kaggle.json
 /src/recommender/recommender_chain.png
+/.vscode
