@@ -205,6 +205,8 @@ if __name__ == "__main__":
     cross_encoder = load_cross_encoder_model()
     recommender_chain = create_recommender_chain(vectorstore)
 
+    # recommender_chain.get_graph().draw_mermaid_png(output_file_path="recommender_chain.png")
+
     query1 = "woman dress for summer less than 2000"
     query2 = "woman dress for summer less than 500 and size xl"
     set_debug(True)
