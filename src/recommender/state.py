@@ -17,10 +17,12 @@ class RecState(TypedDict):
         The prompt.
     llm_output: str
         The LLM generation.
-    documents: List[str]
-        The retrieved documents.
+    products: str
+        The retrieved products.
     answer_status: str
         The answer status.
+    self_query_state: str
+        The self-query state.
 
     """
 
@@ -29,5 +31,6 @@ class RecState(TypedDict):
     # on_topic: bool
     # prompt: str
     llm_output: str
-    documents: List[str]
+    products: str
+    self_query_state: str
     # answer_status: str

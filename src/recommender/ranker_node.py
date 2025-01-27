@@ -1,5 +1,5 @@
 """
-This module implements an LLM-based product recommender.
+This module implements an cross encoder ranker node for product recommender.
 """
 
 import os
@@ -16,18 +16,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.config import settings
-
-
-def initialize_embeddings_model() -> HuggingFaceEmbeddings:
-    """Initializes the HuggingFace embeddings model."""
-    try:
-        model_name = settings.EMBEDDINGS_MODEL_NAME
-        embeddings = HuggingFaceEmbeddings(model_name=model_name)
-        logger.info(f"Successfully initialized embeddings model: {model_name}")
-        return embeddings
-    except Exception as e:
-        logger.exception("Failed to initialize embeddings model.")
-        raise e
+from src.recommender.state import RecState
 
 
 def load_cross_encoder_model() -> HuggingFaceEmbeddings:
@@ -54,13 +43,22 @@ def build_ranker(query: str):
     product_docs = cross_encoder.invoke(query)
     logger.info(f"Retrieved {len(product_docs)} documents.")
 
-    product_list = format_docs(product_docs)
-    return product_list
+    products = format_docs(product_docs)
+    return products
+
+
+def ranker_node(state: RecState) -> RecState:
+    """
+    Ranker node.
+    """
+    query = state["query"]
+    product_list = build_ranker(query)
+    state["products"] = product_list
+    return state
 
 
 if __name__ == "__main__":
-    embeddings = initialize_embeddings_model()
-    cross_encoder = load_cross_encoder_model()
-    query = "woman dress summer"
-    product_list = build_ranker(query)
-    print(product_list)
+    query = "What is the best laptop for gaming?"
+    state = {"query": query}
+    state = ranker_node(state)
+    print(state)

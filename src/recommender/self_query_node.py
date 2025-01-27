@@ -61,7 +61,7 @@ def load_chroma_index(embeddings: HuggingFaceEmbeddings) -> Chroma:
 
 
 def build_self_query_chain(
-    vectorstore: Chroma, use_local_llm: bool = True
+    vectorstore: Chroma, use_local_llm: bool = False
 ) -> RunnableLambda:
     """
     Returns a chain (RunnableLambda) that, given {"query": ...}, uses a SelfQueryRetriever
@@ -117,8 +117,11 @@ def self_query_retrieve(state: RecState) -> RecState:
     # Retrieve products
     results: List[Document] = self_query_chain.invoke({"query": query})
     logger.info(f"Retrieved {len(results)} products for query: {query}")
-
-    state["products"] = results
+    if len(results) == 0:
+        logger.warning("No products found for the query.")
+        state["self_query_state"] = "empty"
+    else:
+        state["self_query_state"] = "success"
     return state
 
 
