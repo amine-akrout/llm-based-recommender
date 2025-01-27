@@ -31,4 +31,4 @@ evaluation.py
 /src/recommender/recommender_chain.png
 /.vscode
 /local_ollama_test.py
-/src/recommender/state.py
+/src/recommender/flow.png

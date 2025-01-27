@@ -177,7 +177,7 @@ def create_bm25_index(documents: list) -> None:
         raise e
 
 
-def embedding_pipeline(n_samples: Optional[int] = 2000) -> None:
+def embedding_pipeline(n_samples: Optional[int] = 100) -> None:
     """Runs the entire embedding pipeline."""
     try:
         df = load_and_preprocess_data(n_samples)
