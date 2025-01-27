@@ -17,6 +17,7 @@ from langchain_chroma import Chroma
 from langchain_community.cache import InMemoryCache
 from langchain_core.runnables import RunnableBranch, RunnableLambda, RunnableParallel
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 from loguru import logger
 
@@ -24,9 +25,12 @@ from loguru import logger
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from utils import CustomChromaTranslator, get_metadata_info
-
 from src.config import settings
+from src.recommender.utils import (
+    CustomChromaTranslator,
+    create_rag_template,
+    get_metadata_info,
+)
 
 
 def initialize_embeddings_model() -> HuggingFaceEmbeddings:
@@ -74,18 +78,27 @@ def load_chroma_index(embeddings: HuggingFaceEmbeddings) -> Chroma:
         raise e
 
 
-def build_self_query_chain(vectorstore: Chroma) -> RunnableLambda:
+def build_self_query_chain(
+    vectorstore: Chroma, use_local_llm: bool = True
+) -> RunnableLambda:
     """
     Returns a chain (RunnableLambda) that, given {"query": ...}, uses a SelfQueryRetriever
     to fetch documents with advanced filtering. If no docs are found, it will return an empty list.
     """
     set_llm_cache(InMemoryCache())
 
-    llm = ChatOpenAI(
-        model=settings.LLM_MODEL_NAME,
-        temperature=settings.LLM_TEMPERATURE,
-        cache=True,
-    )
+    if use_local_llm:
+        llm = ChatOllama(
+            model=settings.OLLAMA_MODEL_NAME,
+            temperature=settings.LLM_TEMPERATURE,
+            cache=True,
+        )
+    else:
+        llm = ChatOpenAI(
+            model=settings.LLM_MODEL_NAME,
+            temperature=settings.LLM_TEMPERATURE,
+            cache=True,
+        )
 
     attribute_info, doc_contents = get_metadata_info()
 
@@ -113,24 +126,21 @@ def build_rag_chain():
     RAG retriever.
     """
     set_llm_cache(InMemoryCache())
-    # define the prompt template
-    prompt_template = """You are a product recommender system that helps users find products.
-    You are given a list of products and a query. You need to find the most relevant products based on the query.
+    prompt = create_rag_template()
 
-    Products:
-    {docs}
+    # llm = ChatOpenAI(
+    #     model=settings.LLM_MODEL_NAME,
+    #     temperature=settings.LLM_TEMPERATURE,
+    #     max_tokens=settings.LLM_MAX_TOKENS,
+    #     cache=True,
+    #     api_key=settings.OPENAI_API_KEY.get_secret_value(),
+    # )
 
-    Query: {query}
-    """
-
-    prompt = PromptTemplate(template=prompt_template, input_variables=["docs", "query"])
-
-    llm = ChatOpenAI(
-        model=settings.LLM_MODEL_NAME,
+    llm = ChatOllama(
+        model=settings.OLLAMA_MODEL_NAME,
         temperature=settings.LLM_TEMPERATURE,
         max_tokens=settings.LLM_MAX_TOKENS,
         cache=True,
-        api_key=settings.OPENAI_API_KEY.get_secret_value(),
     )
     parser = StrOutputParser()
     cross_encoder = load_cross_encoder_model()
@@ -211,6 +221,8 @@ if __name__ == "__main__":
     vectorstore = load_chroma_index(embeddings)
     cross_encoder = load_cross_encoder_model()
     recommender_chain = create_recommender_chain(vectorstore)
+
+    # recommender_chain.get_graph().draw_mermaid_png(output_file_path="recommender_chain.png")
 
     query1 = "woman dress for summer less than 2000"
     query2 = "woman dress for summer less than 500 and size xl"

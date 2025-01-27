@@ -2,6 +2,7 @@
 This module contains utility functions for the recommender service.
 """
 
+from langchain.prompts import PromptTemplate
 from langchain_community.query_constructors.chroma import (
     ChromaTranslator as BaseChromaTranslator,
 )
@@ -60,3 +61,30 @@ DOC_CONTENT = "A detailed description of an e-commerce product, including its fe
 
 def get_metadata_info():
     return ATTRIBUTE_INFO, DOC_CONTENT
+
+
+def create_rag_template():
+    prompt_template = """You are an intelligent shopping assistant that helps users find the best products based on their query.
+
+    The user is looking for products related to: **{query}**.
+
+    Here are some available products:
+    {docs}
+
+    Please recommend the best products in a friendly, conversational tone. Consider the following:
+    - **Match with the user's preferences** (e.g., price, size, brand).
+    - **High user ratings and popularity**.
+    - **Relevance to the user's intent**.
+
+    **Respond in natural language as if you were personally assisting the user.**
+    
+    Example response:
+    "Based on your request for {query}, here are some great options: 
+    1. [Product A] - A great choice because...
+    2. [Product B] - This one stands out due to...
+    
+    Let me know if you need more details or alternatives!"
+    """
+
+    prompt = PromptTemplate(template=prompt_template, input_variables=["docs", "query"])
+    return prompt

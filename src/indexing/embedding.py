@@ -7,6 +7,7 @@ import json
 import os
 import pickle
 import sys
+import warnings
 from typing import Optional
 
 import pandas as pd
@@ -22,6 +23,8 @@ from loguru import logger
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from src.config import settings
+
+warnings.filterwarnings("ignore")
 
 
 def clean_column_names(df: pd.DataFrame) -> pd.DataFrame:

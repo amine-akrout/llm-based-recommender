@@ -28,3 +28,7 @@ evaluation.py
 # nemo guardrails
 /src/core/guardrail
 /kaggle.json
+/src/recommender/recommender_chain.png
+/.vscode
+/local_ollama_test.py
+/src/recommender/state.py
