@@ -64,25 +64,26 @@ def get_metadata_info():
 
 
 def create_rag_template():
-    prompt_template = """You are an advanced product recommender system.
+    prompt_template = """You are an intelligent shopping assistant that helps users find the best products based on their query.
 
-    ### **Task:**
-    - Find the best products for the given user query.
-    - Prioritize items **matching query filters** (e.g., price, size).
-    - Rank products by **relevance** and **popularity**.
+    The user is looking for products related to: **{query}**.
 
-    ### **Products:**
+    Here are some available products:
     {docs}
 
-    ### **User Query:**
-    {query}
+    Please recommend the best products in a friendly, conversational tone. Consider the following:
+    - **Match with the user's preferences** (e.g., price, size, brand).
+    - **High user ratings and popularity**.
+    - **Relevance to the user's intent**.
 
-    ### **Recommendation Criteria:**
-    - Exact match with filters (e.g., price < 2000, size = XL).
-    - High user ratings and popularity.
-    - Match with query intent.
-
-    **Return only the most relevant products.**
+    **Respond in natural language as if you were personally assisting the user.**
+    
+    Example response:
+    "Based on your request for {query}, here are some great options: 
+    1. [Product A] - A great choice because...
+    2. [Product B] - This one stands out due to...
+    
+    Let me know if you need more details or alternatives!"
     """
 
     prompt = PromptTemplate(template=prompt_template, input_variables=["docs", "query"])

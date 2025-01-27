@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     LLM_MODEL_NAME: str = "gpt-4o-mini"
     LLM_TEMPERATURE: float = 0
     LLM_MAX_TOKENS: int = 100
+    # OLLAMA_MODEL_NAME: str = "llama3.2:3b"
+    OLLAMA_MODEL_NAME: str = "qwen2.5"
+    # OLLAMA_MODEL_NAME: str = "deepseek-r1"
 
     FAISS_INDEX_PATH: str = str(INDEX_DIR / "faiss_index.faiss")
     BM25_INDEX_PATH: str = str(INDEX_DIR / "bm25_index.pkl")

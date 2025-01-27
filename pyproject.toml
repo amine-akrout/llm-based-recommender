@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "faiss-cpu==1.7.4",
+    "faiss-cpu>=1.9.0.post1",
     "fastapi==0.115.7",
     "ipykernel>=6.29.5",
     "kaggle==1.6.17",
@@ -13,11 +13,14 @@ dependencies = [
     "langchain-chroma==0.2.0",
     "langchain-community==0.3.15",
     "langchain-core==0.3.31",
+    "langchain-experimental>=0.3.4",
     "langchain-huggingface==0.1.2",
+    "langchain-ollama>=0.2.2",
     "langchain-openai==0.3.2",
     "loguru==0.7.3",
     "nemoguardrails==0.11.0",
     "numpy==1.26.4",
+    "ollama>=0.4.7",
     "pandas==2.0.2",
     "pydantic==2.10.6",
     "pydantic-settings==2.7.1",

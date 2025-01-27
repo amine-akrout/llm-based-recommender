@@ -30,3 +30,5 @@ evaluation.py
 /kaggle.json
 /src/recommender/recommender_chain.png
 /.vscode
+/local_ollama_test.py
+/src/recommender/state.py

@@ -6,6 +6,7 @@ It also applies cross-encoder reranking to improve retrieval quality.
 import os
 import pickle
 import sys
+import warnings
 from typing import List
 
 from langchain.retrievers import ContextualCompressionRetriever, EnsembleRetriever
@@ -19,6 +20,8 @@ from loguru import logger
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from src.config import settings
+
+warnings.filterwarnings("ignore")
 
 
 def load_faiss_index() -> FAISS:

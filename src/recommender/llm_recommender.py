@@ -17,6 +17,7 @@ from langchain_chroma import Chroma
 from langchain_community.cache import InMemoryCache
 from langchain_core.runnables import RunnableBranch, RunnableLambda, RunnableParallel
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 from loguru import logger
 
@@ -77,18 +78,27 @@ def load_chroma_index(embeddings: HuggingFaceEmbeddings) -> Chroma:
         raise e
 
 
-def build_self_query_chain(vectorstore: Chroma) -> RunnableLambda:
+def build_self_query_chain(
+    vectorstore: Chroma, use_local_llm: bool = True
+) -> RunnableLambda:
     """
     Returns a chain (RunnableLambda) that, given {"query": ...}, uses a SelfQueryRetriever
     to fetch documents with advanced filtering. If no docs are found, it will return an empty list.
     """
     set_llm_cache(InMemoryCache())
 
-    llm = ChatOpenAI(
-        model=settings.LLM_MODEL_NAME,
-        temperature=settings.LLM_TEMPERATURE,
-        cache=True,
-    )
+    if use_local_llm:
+        llm = ChatOllama(
+            model=settings.OLLAMA_MODEL_NAME,
+            temperature=settings.LLM_TEMPERATURE,
+            cache=True,
+        )
+    else:
+        llm = ChatOpenAI(
+            model=settings.LLM_MODEL_NAME,
+            temperature=settings.LLM_TEMPERATURE,
+            cache=True,
+        )
 
     attribute_info, doc_contents = get_metadata_info()
 
@@ -118,12 +128,19 @@ def build_rag_chain():
     set_llm_cache(InMemoryCache())
     prompt = create_rag_template()
 
-    llm = ChatOpenAI(
-        model=settings.LLM_MODEL_NAME,
+    # llm = ChatOpenAI(
+    #     model=settings.LLM_MODEL_NAME,
+    #     temperature=settings.LLM_TEMPERATURE,
+    #     max_tokens=settings.LLM_MAX_TOKENS,
+    #     cache=True,
+    #     api_key=settings.OPENAI_API_KEY.get_secret_value(),
+    # )
+
+    llm = ChatOllama(
+        model=settings.OLLAMA_MODEL_NAME,
         temperature=settings.LLM_TEMPERATURE,
         max_tokens=settings.LLM_MAX_TOKENS,
         cache=True,
-        api_key=settings.OPENAI_API_KEY.get_secret_value(),
     )
     parser = StrOutputParser()
     cross_encoder = load_cross_encoder_model()
