@@ -18,6 +18,7 @@ dependencies = [
     "langchain-huggingface==0.1.2",
     "langchain-ollama>=0.2.2",
     "langchain-openai==0.3.2",
+    "langgraph>=0.2.67",
     "loguru==0.7.3",
     "nemoguardrails==0.11.0",
     "numpy==1.26.4",

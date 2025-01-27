@@ -128,14 +128,6 @@ def build_rag_chain():
     set_llm_cache(InMemoryCache())
     prompt = create_rag_template()
 
-    # llm = ChatOpenAI(
-    #     model=settings.LLM_MODEL_NAME,
-    #     temperature=settings.LLM_TEMPERATURE,
-    #     max_tokens=settings.LLM_MAX_TOKENS,
-    #     cache=True,
-    #     api_key=settings.OPENAI_API_KEY.get_secret_value(),
-    # )
-
     llm = ChatOllama(
         model=settings.OLLAMA_MODEL_NAME,
         temperature=settings.LLM_TEMPERATURE,
