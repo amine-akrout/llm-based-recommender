@@ -10,7 +10,6 @@ from langchain.schema.output_parser import StrOutputParser
 from langchain_community.cache import InMemoryCache
 from langchain_core.runnables import RunnableLambda, RunnableParallel
 from langchain_ollama import ChatOllama
-from loguru import logger
 
 # Local imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -67,20 +66,5 @@ def rag_recommender(state: RecState) -> RecState:
     docs = state["products"]
 
     output = rag_chain.invoke({"docs": docs, "query": query})
-    state["output"] = output
+    state["recommendation"] = output
     return state
-
-
-if __name__ == "__main__":
-    # Example documents and query
-    docs = """- {\n  "Product Details": "floral polyester square neck womens regular dress - white",
-                \n  "Brand Name": "and",\n  "Available Sizes": "8, 10, 14, 16, 18",\n 
-                "Product Price": 2319.0\n}"""
-    query = "What are the available sizes for the floral polyester square neck womens regular dress - white?"
-
-    # Build the RAG chain
-    rag_chain = build_rag_chain()
-
-    # Invoke the chain with the input
-    input_data = {"docs": docs, "query": query}
-    output = rag_chain.invoke(input_data)

@@ -55,10 +55,3 @@ def ranker_node(state: RecState) -> RecState:
     product_list = build_ranker(query)
     state["products"] = product_list
     return state
-
-
-if __name__ == "__main__":
-    query = "What is the best laptop for gaming?"
-    state = {"query": query}
-    state = ranker_node(state)
-    print(state)

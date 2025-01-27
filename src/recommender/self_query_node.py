@@ -1,17 +1,18 @@
+"""
+This module contains the self-query retriever node, which retrieves products using the self-query retriever.
+"""
+
 import os
 import sys
 from functools import lru_cache
-from typing import List, TypedDict
+from typing import List
 
 from langchain.chains.query_constructor.base import load_query_constructor_runnable
-from langchain.globals import set_llm_cache
 from langchain.retrievers import SelfQueryRetriever
+from langchain.schema import Document
 from langchain_chroma import Chroma
-from langchain_community.cache import InMemoryCache
-from langchain_core.documents import Document
 from langchain_core.runnables import RunnableLambda
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_ollama import ChatOllama
 from langchain_openai import ChatOpenAI
 from loguru import logger
 from tenacity import retry, stop_after_attempt, wait_fixed
@@ -60,27 +61,15 @@ def load_chroma_index(embeddings: HuggingFaceEmbeddings) -> Chroma:
         raise e
 
 
-def build_self_query_chain(
-    vectorstore: Chroma, use_local_llm: bool = False
-) -> RunnableLambda:
+def build_self_query_chain(vectorstore: Chroma) -> RunnableLambda:
     """
     Returns a chain (RunnableLambda) that, given {"query": ...}, uses a SelfQueryRetriever
     to fetch documents with advanced filtering. If no docs are found, it will return an empty list.
     """
-    set_llm_cache(InMemoryCache())
-
-    if use_local_llm:
-        llm = ChatOllama(
-            model=settings.OLLAMA_MODEL_NAME,
-            temperature=settings.LLM_TEMPERATURE,
-            cache=True,
-        )
-    else:
-        llm = ChatOpenAI(
-            model=settings.LLM_MODEL_NAME,
-            temperature=settings.LLM_TEMPERATURE,
-            cache=True,
-        )
+    llm = ChatOpenAI(
+        model=settings.LLM_MODEL_NAME,
+        temperature=settings.LLM_TEMPERATURE,
+    )
 
     attribute_info, doc_contents = get_metadata_info()
 
@@ -98,7 +87,6 @@ def build_self_query_chain(
         verbose=True,
         structured_query_translator=CustomChromaTranslator(),
     )
-
     self_query_chain = RunnableLambda(lambda inputs: retriever.invoke(inputs["query"]))
     return self_query_chain
 
@@ -111,21 +99,19 @@ def self_query_retrieve(state: RecState) -> RecState:
     chroma_index = load_chroma_index(embeddings)
     self_query_chain = build_self_query_chain(chroma_index)
 
+    def format_docs(docs: List[Document]):
+        return "\n\n".join([f"- {doc.page_content}" for doc in docs])
+
     query = state["query"]
     logger.info(f"Processing query: {query}")
 
     # Retrieve products
-    results: List[Document] = self_query_chain.invoke({"query": query})
+    results = self_query_chain.invoke({"query": query})
     logger.info(f"Retrieved {len(results)} products for query: {query}")
     if len(results) == 0:
         logger.warning("No products found for the query.")
         state["self_query_state"] = "empty"
     else:
         state["self_query_state"] = "success"
+        state["products"] = format_docs(results)
     return state
-
-
-if __name__ == "__main__":
-    state = RecState()
-    state["query"] = "woman dress"
-    state = self_query_retrieve(state)
