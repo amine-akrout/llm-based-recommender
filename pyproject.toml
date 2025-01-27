@@ -30,5 +30,6 @@ dependencies = [
     "pytest-mock>=3.14.0",
     "python-dotenv==1.0.1",
     "rank-bm25==0.2.2",
+    "streamlit>=1.41.1",
     "transformers==4.46.3",
 ]
