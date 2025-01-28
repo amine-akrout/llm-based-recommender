@@ -21,8 +21,8 @@ from loguru import logger
 
 # Append project root directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-
 from src.config import settings
+from src.indexing.data_loader import download_data
 
 warnings.filterwarnings("ignore")
 
@@ -180,6 +180,7 @@ def create_bm25_index(documents: list) -> None:
 def embedding_pipeline(n_samples: Optional[int] = 100) -> None:
     """Runs the entire embedding pipeline."""
     try:
+        download_data()
         df = load_and_preprocess_data(n_samples)
         documents = generate_documents()
         embeddings = initialize_embeddings_model()

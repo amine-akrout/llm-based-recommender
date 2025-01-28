@@ -1,0 +1,3 @@
+data/indexes/*
+.venv/*
+.python-version

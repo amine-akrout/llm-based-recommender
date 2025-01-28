@@ -58,6 +58,7 @@ def topic_classifier(state: RecState):
     llm = ChatOllama(
         model=settings.OLLAMA_MODEL_NAME,
         temperature=0,
+        base_url=os.environ.get("OLLAMA_HOST"),
     )
 
     # Add structured output to the LLM

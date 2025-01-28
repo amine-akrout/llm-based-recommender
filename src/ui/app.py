@@ -5,7 +5,7 @@ import requests
 import streamlit as st
 
 # Backend API URL
-API_URL = os.getenv("API_URL", "http://localhost:8000/recommend")
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 # Page Config
 st.set_page_config(
@@ -148,7 +148,7 @@ if send_button:
 
         try:
             # Call FastAPI Backend
-            response = requests.post(API_URL, json={"question": query})
+            response = requests.post(API_URL + "/recommend", json={"question": query})
 
             if response.status_code == 200:
                 answer = response.json().get("answer", "No recommendation found.")

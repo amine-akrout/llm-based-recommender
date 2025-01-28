@@ -11,3 +11,9 @@ app.include_router(recommender.router)
 @app.get("/")
 def root():
     return {"message": "Welcome to the Parenting Chatbot API!"}
+
+
+# add helth check endpoint
+@app.get("/health")
+def health():
+    return {"status": "healthy"}

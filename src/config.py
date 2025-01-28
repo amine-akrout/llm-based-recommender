@@ -64,11 +64,6 @@ class Settings(BaseSettings):
     # Open AI API settings
     OPENAI_API_KEY: SecretStr | None = None
 
-    # Lanfuse settings
-    LANGFUSE_SECRET_KEY: SecretStr | None = None
-    LANGFUSE_PUBLIC_KEY: SecretStr | None = None
-    LANGFUSE_HOST: str = os.environ.get("LANGFUSE_HOST", "http://localhost:3000")
-
     # Logging settings
     LOGGING_LEVEL: str = "INFO"
     LOGGING_FILE: str = str(BASE_DIR / "logs" / "preprocessing.log")
