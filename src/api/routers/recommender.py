@@ -46,8 +46,10 @@ def get_chat_response(request: QuestionRequest):
         recommendation = response.get(
             "recommendation", "No recommendation found for your request."
         )
+        content = {"question": request.question, "answer": recommendation}
+        logger.info(content)
         return JSONResponse(
-            content={"question": request.question, "answer": recommendation}
+            content=content,
         )
 
     except Exception as e:
