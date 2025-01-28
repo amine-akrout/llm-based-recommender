@@ -12,10 +12,10 @@ indexing:
 retriver:
 	uv run python src/retriever/hybrid_retriever.py
 
-start-api:
+api:
 	uv run uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 
-start-ui:
+ui:
 	uv run python -m streamlit run src/ui/app.py
 
 all: 

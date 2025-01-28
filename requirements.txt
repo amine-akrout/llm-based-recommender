@@ -1,3 +1,4 @@
+pandas>=2.1.1
 chromadb>=0.5.23
 faiss-cpu>=1.9.0.post1
 fastapi==0.115.7
@@ -14,10 +15,10 @@ langgraph>=0.2.67
 loguru==0.7.3
 numpy==1.26.4
 ollama>=0.4.7
-pandas==2.0.2
 pydantic==2.10.6
 pydantic-settings==2.7.1
 python-dotenv==1.0.1
 rank-bm25==0.2.2
 streamlit>=1.41.1
 transformers==4.46.3
+lark>=1.1.9
