@@ -2,8 +2,8 @@ import os
 import sys
 
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_ollama import ChatOllama
+from pydantic import BaseModel, Field
 
 # Local imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))

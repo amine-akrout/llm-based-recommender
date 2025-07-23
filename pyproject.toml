@@ -33,3 +33,9 @@ dependencies = [
     "streamlit>=1.41.1",
     "transformers==4.46.3",
 ]
+
+[dependency-groups]
+dev = [
+    "pylint>=3.3.7",
+    "ruff>=0.12.4",
+]
