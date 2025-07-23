@@ -32,3 +32,4 @@ evaluation.py
 /.vscode
 /local_ollama_test.py
 /src/recommender/flow.png
+/.langgraph_api

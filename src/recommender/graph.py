@@ -1,11 +1,16 @@
+"""
+Recommender Graph Workflow"""
+
 import os
 import sys
 
 from langchain.globals import set_debug
+from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, StateGraph
 from loguru import logger
 
 # Append project root directory
+# pylint: disable=wrong-import-position
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from src.recommender.check_topic_node import topic_classifier
 from src.recommender.rag_node import rag_recommender
@@ -17,6 +22,9 @@ set_debug(True)
 
 
 def create_recommendaer_graph():
+    """
+    Creates the recommender graph workflow.
+    """
     workflow = StateGraph(RecState)
 
     workflow.add_node("self_query_retrieve", self_query_retrieve)
@@ -39,14 +47,19 @@ def create_recommendaer_graph():
         lambda state: state["self_query_state"],
         {"success": "rag_recommender", "empty": "ranker"},
     )
-    return workflow.compile()
+    memory = MemorySaver()
 
+    return workflow.compile(checkpointer=memory)
+
+
+# app = create_recommendaer_graph()
 
 if __name__ == "__main__":
     app = create_recommendaer_graph()
-    app.get_graph().draw_mermaid_png(output_file_path="flow.png")
+    # app.get_graph().draw_mermaid_png(output_file_path="flow.png")
     # Run the workflow
+    config = {"configurable": {"thread_id": "1"}}
     state = {"query": "Woman dress less than 50"}
-    output = app.invoke(state)
+    output = app.invoke(state, config=config)
 
     logger.info(output)

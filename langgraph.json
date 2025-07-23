@@ -1,0 +1,11 @@
+{
+    "dockerfile_lines": [],
+    "graphs": {
+        "agent": "src/recommender/graph.py:app"
+    },
+    "env": ".env",
+    "python_version": "3.12",
+    "dependencies": [
+        "."
+    ]
+}

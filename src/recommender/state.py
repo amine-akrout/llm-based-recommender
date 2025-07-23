@@ -2,7 +2,9 @@
 State type definitions.
 """
 
-from typing import TypedDict
+from typing import List, TypedDict
+
+from langchain_core.messages import BaseMessage, HumanMessage
 
 
 class RecState(TypedDict):
